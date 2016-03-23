@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="description" content="Talking Clock">
+		<meta name="author" content="Christophe Séjourné">
+<!--	<link rel="icon" href="../../favicon.ico"> -->
+		<title>Talking Clock</title>
+		<link rel="stylesheet" href="bootstrap.min.css"> <!-- Bootstrap core CSS -->
+		<link rel="stylesheet" href="clock.css"> <!-- Custom styles -->
+	</head>
+
+	<body>
+
+    <div class="site-wrapper">
+		<div class="site-wrapper-inner">
+			<div class="cover-container">
+				<div class="inner cover">
+
+					<h1 class="cover-heading" style="text-align:center">Talking Clock Project</h1><br>
+
+					<audio id="audio" controls><source src='' type="audio/mpeg">Your browser does not support the audio element.</audio><br>
+
+					<h2>Goal</h2>
+						<p>Our goal is to build a 'talking clock' with the following specifications :</p>
+						<ul>
+							<li>Clients sole responsability is to retrieve and play audio files</li>
+							<li>A server acts as the time reference, build on-the-fly audio files and triggers 'play events'</li>
+							<li>Talks are composed thanks to the minimum set of personal audio patterns</li>
+						</ul><br>
+
+					<h2>Design choices</h2>
+						<ul>
+							<li>HTML5 Audio tag for broad client support</li>
+							<li>Default use of .ogg audio file (fallback to .mp3 if client requires)</li>
+							<li>Node.js, socket.io and node-schedule for sync management from server side</li>
+						</ul><br>
+
+					<h2>Preliminary treatments</h2>
+						<ol>
+							<li>We record a minimum list of elementary voice patterns "0, 1, et 1, 2:16, 20, 30, 40, 50, heure, minute, seconde" using an iPhone voice recorder</li>
+							<li><a href="http://www.audacityteam.org/">Audacity</a> "Sound Finder" & "Export Multiple” functions are then used to isolate and split patterns from previous record</li>
+							<li>Finally, a Python script uses <a href="http://sox.sourceforge.net/">Sox</a> to recompose an exhaustive list of spoken numbers ranging from 0 to 59</li>
+						</ol><br>
+
+					<h2>Workflow</h2>
+						<ol>
+							<li>The server emits regularly a 'play event' with respect to a 5 seconds node-schedule</li>
+							<li>Clients retrieve the current audio file and start playing</li>
+							<li>During that time, the server prepares the next file to play : Sox composes on-the-fly audio sentences (join & merge elementary audio patterns) and persists corresponding ogg and mp3 files</li>
+						</ol><br>
+
+					<h2>Concluding remarks</h2>
+						<ul>
+							<li>An other tempting approach is to run a streaming server as <a href="http://icecast.org/">IceCast</a> feeded by <a href="http://icecast.org/ezstream/">ezStream</a> it-self plugged on a dynamically generated list of audio files. This approach is misleading : managing time sync on server side (both at inception and periodic resets) is tricky in this framework.</li>
+							<li>Finally, a valid (but cumbersome) way is to use a <a href="https://webrtc.org/">WebRTC</a> framework. It's over optimized for our needs and we haven't tested it.</li>
+							<li>Last word : our solution doesn't take into account client internet bandwidth. UX will be poor if it's too low !</li>
+						</ul><br>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+		<!-- Bootstrap core JavaScript, placed at the end of the document so the pages load faster -->
+		<script src="jquery.min.js"></script>
+		<script src="bootstrap.min.js"></script>
+
+		<script src="/socket.io/socket.io.js"></script>
+		<script>
+		jQuery(document).ready(function($){
+
+			// Use .ogg files and eventually fallback to .mp3
+			var myAudio = document.createElement('audio');
+			if (myAudio.canPlayType('audio/ogg')) {
+				audioExt = '.ogg';
+			} else {
+				audioExt = '.mp3'; };
+
+			var socket = io();
+			var audio = document.querySelector('#audio');
+
+			socket.on('play', function(msg){
+				audio.src = msg + audioExt;
+				audio.play(); });
+
+		});
+		</script>
+
+	</body>
+</html>
