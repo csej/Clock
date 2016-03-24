@@ -9,7 +9,8 @@ Our goal is to build a **talking clock** with the following specifications :
 
 - Clients sole responsability is to retrieve and play audio files
 - A server acts as the time reference, build on-the-fly audio files and triggers 'play events'
-- Talks are composed thanks to the minimum set of personal audio patterns
+- Use of an external text2speech solution is disallowed (otherwise [eSpeak](http://espeak.sourceforge.net/) will kindly do the job)
+- Homemade talks are composed thanks to the minimum set of personal audio patterns
 
 
 
